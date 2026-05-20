@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dorfromantik Scoresheet</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Dorfromantik</h1>
+    <p>Scoresheet &nbsp;·&nbsp; 1–6 players</p>
+  </div>
+  <div class="hdr-score">
+    <span class="lbl">Score</span>
+    <span class="val zero" id="hdr-val">0</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- TASKS CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">B</span>
+        <span class="title">Tasks</span>
+      </div>
+      <span class="subtot zero" id="g2">0</span>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-col">
+        <span class="emoji">🌳</span>
+        <input type="number" inputmode="numeric" id="b2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🌾</span>
+        <input type="number" inputmode="numeric" id="c2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🏠</span>
+        <input type="number" inputmode="numeric" id="d2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🚂</span>
+        <input type="number" inputmode="numeric" id="e2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">💧</span>
+        <input type="number" inputmode="numeric" id="f2" min="0" placeholder="0" oninput="calc()">
+      </div>
+    </div>
+  </div>
+
+  <!-- FLAGS + LONGEST CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">C·D</span>
+        <span class="title">Flags &amp; Longest</span>
+      </div>
+      <span class="subtot zero" id="g3">0</span>
+    </div>
+    <div class="flags-body">
+      <div class="flags-left">
+        <div class="flags-title">Flags (pts each)</div>
+        <div class="flag-row">
+          <span class="flag-lbl">🌳</span>
+          <input type="number" inputmode="numeric" id="b3" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="flag-row">
+          <span class="flag-lbl">🌾</span>
+          <input type="number" inputmode="numeric" id="c3" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="flag-row">
+          <span class="flag-lbl">🏠</span>
+          <input type="number" inputmode="numeric" id="d3" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+      <div class="flags-divider"></div>
+      <div class="flags-right">
+        <div class="flags-title">Longest (tile count)</div>
+        <div class="longest-row">
+          <span class="longest-icon">🚂</span>
+          <span class="longest-lbl">Track</span>
+          <input type="number" inputmode="numeric" id="e4" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="longest-row">
+          <span class="longest-icon">💧</span>
+          <span class="longest-lbl">Stream</span>
+          <input type="number" inputmode="numeric" id="f4" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNLOCKED CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">E</span>
+        <span class="title">Unlocked</span>
+      </div>
+      <span class="subtot zero" id="g5">0</span>
+    </div>
+    <!-- Two-column grid, mirroring the spreadsheet left/right layout -->
+    <div class="unlocked-body">
+      <div class="unlocked-col">
+        <div class="unlocked-item">
+          <span class="u-lbl">Red Hearts<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">1/matching edge</em></span>
+          <input type="number" inputmode="numeric" id="b6" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Circus<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">surrounded = 10</em></span>
+          <input type="number" inputmode="numeric" id="b7" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Signalman<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/grade crossing</em></span>
+          <input type="number" inputmode="numeric" id="b8" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Shepherdess<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">1/sheep</em></span>
+          <input type="number" inputmode="numeric" id="b9" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Hill<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/task tile @ dist 2</em></span>
+          <input type="number" inputmode="numeric" id="b10" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Construction Site<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">territory 7+ = 7</em></span>
+          <input type="number" inputmode="numeric" id="b11" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Balloon Launch<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/distance</em></span>
+          <input type="number" inputmode="numeric" id="b12" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Golden Heart<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/matching edge</em></span>
+          <input type="number" inputmode="numeric" id="b13" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+      <div class="unlocked-col">
+        <div class="unlocked-item">
+          <span class="u-lbl">Forest Cabin<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f6" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Harvest Festival<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f7" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Watchtower<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f8" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Locomotive<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f9" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Ship<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f10" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Train Station<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">closed = 1/tile</em></span>
+          <input type="number" inputmode="numeric" id="f11" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Harbor<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">closed = 1/tile</em></span>
+          <input type="number" inputmode="numeric" id="f12" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <!-- empty to balance the grid -->
+        <div class="unlocked-item" style="background:var(--surface2)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- META + RESULT CARD -->
+  <div class="meta-card">
+    <div class="meta-fields">
+      <div class="meta-field">
+        <label>Player names</label>
+        <input type="text" id="player-names" placeholder="Enter names…">
+      </div>
+      <div class="meta-field">
+        <label>Date</label>
+        <input type="date" id="game-date">
+      </div>
+    </div>
+    <div class="result-row">
+      <span class="r-lbl">Result</span>
+      <span class="r-val zero" id="g14">0</span>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function v(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+
+function setTot(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.classList.toggle('zero', val === 0);
+}
+
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 200);
+}
+
+function calc() {
+  const g2 = v('b2')+v('c2')+v('d2')+v('e2')+v('f2');
+  setTot('g2', g2);
+
+  const g3 = v('b3')+v('c3')+v('d3')+v('e4')+v('f4');
+  setTot('g3', g3);
+
+  const g5 = v('b6')+v('f6')+v('b7')+v('f7')+v('b8')+v('f8')+
+             v('b9')+v('f9')+v('b10')+v('f10')+v('b11')+v('f11')+
+             v('b12')+v('f12')+v('b13');
+  setTot('g5', g5);
+
+  const total = g2 + g3 + g5;
+  setTot('g14', total);
+
+  const hdr = document.getElementById('hdr-val');
+  const prev = hdr.textContent;
+  hdr.textContent = total;
+  hdr.classList.toggle('zero', total === 0);
+  if (String(total) !== prev) bump(hdr);
+}
+
+document.getElementById('game-date').value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
