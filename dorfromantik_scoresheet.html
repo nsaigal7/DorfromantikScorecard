@@ -116,11 +116,11 @@
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Circus<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">surrounded = 10</em></span>
-          <input type="number" inputmode="numeric" id="b7" min="0" placeholder="0" oninput="calc()">
+          <input type="number" inputmode="numeric" id="b7" min="0" placeholder="0" oninput="validateCircus(this); calc()">
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Signalman<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/grade crossing</em></span>
-          <input type="number" inputmode="numeric" id="b8" min="0" placeholder="0" oninput="calc()">
+          <input type="number" inputmode="numeric" id="b8" min="0" placeholder="0" oninput="validateEven(this); calc()">
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Shepherdess<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">1/sheep</em></span>
@@ -128,7 +128,7 @@
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Hill<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/task tile @ dist 2</em></span>
-          <input type="number" inputmode="numeric" id="b10" min="0" placeholder="0" oninput="calc()">
+          <input type="number" inputmode="numeric" id="b10" min="0" placeholder="0" oninput="validateEven(this); calc()">
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Construction Site<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">territory 7+ = 7</em></span>
@@ -136,11 +136,11 @@
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Balloon Launch<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/distance</em></span>
-          <input type="number" inputmode="numeric" id="b12" min="0" placeholder="0" oninput="calc()">
+          <input type="number" inputmode="numeric" id="b12" min="0" placeholder="0" oninput="validateEven(this); calc()">
         </div>
         <div class="unlocked-item">
           <span class="u-lbl">Golden Heart<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/matching edge</em></span>
-          <input type="number" inputmode="numeric" id="b13" min="0" placeholder="0" oninput="calc()">
+          <input type="number" inputmode="numeric" id="b13" min="0" placeholder="0" oninput="validateEven(this); calc()">
         </div>
       </div>
       <div class="unlocked-col">
@@ -196,9 +196,68 @@
     </div>
   </div>
 
+  <button class="submit-btn" id="submit-btn" onclick="submitScore()">
+    <span class="btn-icon">💾</span>
+    <span class="btn-label">Save Score</span>
+  </button>
+
+  <!-- HISTORY CARD -->
+  <div class="history-card">
+    <div class="history-head">
+      <div class="history-head-left">
+        <span class="pill" style="background:var(--border2)">H</span>
+        <span class="title">Score History</span>
+      </div>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadHistory()" title="Refresh">↻</button>
+    </div>
+    <div class="history-body" id="history-body">
+      <div class="history-empty">Loading…</div>
+    </div>
+    <div class="history-pagination" id="history-pagination" style="display:none">
+      <button class="page-btn" id="prev-btn" onclick="changePage(-1)" disabled>← Prev</button>
+      <span class="page-info" id="page-info">Page 1</span>
+      <button class="page-btn" id="next-btn" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+
 </div><!-- /page -->
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
+const API_BASE = '/api/v1';
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let totalPages = 1;
+
+// ── Validation ────────────────────────────────────────────────────────────────
+function validateCircus(el) {
+  const val = parseInt(el.value);
+  if (el.value === '' || val === 0 || val === 10) {
+    el.classList.remove('invalid');
+  } else {
+    el.classList.add('invalid');
+    showToast('Circus can only score 0 or 10', 'error');
+  }
+}
+
+function validateEven(el) {
+  const val = parseInt(el.value);
+  if (el.value === '' || val % 2 === 0) {
+    el.classList.remove('invalid');
+  } else {
+    el.classList.add('invalid');
+    const name = el.id === 'b8' ? 'Signalman' : 'Hill';
+    showToast(`${name} score must be even`, 'error');
+  }
+}
+
+function hasValidationErrors() {
+  return document.querySelectorAll('.invalid').length > 0;
+}
+
+
 function v(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
 
 function setTot(id, val) {
@@ -237,7 +296,182 @@ function calc() {
   if (String(total) !== prev) bump(hdr);
 }
 
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function buildPayload() {
+  return {
+    date:    document.getElementById('game-date').value,
+    players: document.getElementById('player-names').value.trim(),
+    tasks: {
+      forest:  v('b2'),
+      grain:   v('c2'),
+      village: v('d2'),
+      track:   v('e2'),
+      stream:  v('f2'),
+      total:   v('b2')+v('c2')+v('d2')+v('e2')+v('f2'),
+    },
+    flags: {
+      green:  v('b3'),
+      yellow: v('c3'),
+      red:    v('d3'),
+    },
+    longest: {
+      track:  v('e4'),
+      stream: v('f4'),
+    },
+    unlocked: {
+      red_hearts:        v('b6'),
+      circus:            v('b7'),
+      signalman:         v('b8'),
+      shepherdess:       v('b9'),
+      hill:              v('b10'),
+      construction_site: v('b11'),
+      balloon_launch:    v('b12'),
+      golden_heart:      v('b13'),
+      forest_cabin:      v('f6'),
+      harvest_festival:  v('f7'),
+      watchtower:        v('f8'),
+      locomotive:        v('f9'),
+      ship:              v('f10'),
+      train_station:     v('f11'),
+      harbor:            v('f12'),
+    },
+    total: parseInt(document.getElementById('g14').textContent) || 0,
+  };
+}
+
+async function submitScore() {
+  const btn = document.getElementById('submit-btn');
+  const payload = buildPayload();
+
+  if (payload.total === 0) {
+    showToast('⚠️ Nothing to save — score is 0', 'error');
+    return;
+  }
+
+  if (hasValidationErrors()) {
+    showToast('⚠️ Fix validation errors before saving', 'error');
+    return;
+  }
+
+  // Loading state
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span><span class="btn-label">Saving…</span>';
+
+  try {
+    const res = await fetch(`${API_BASE}/score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    btn.classList.remove('loading');
+    btn.classList.add('success');
+    btn.innerHTML = '<span class="btn-icon">✓</span><span class="btn-label">Saved!</span>';
+    showToast('Score saved successfully', 'ok');
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.innerHTML = '<span class="btn-icon">💾</span><span class="btn-label">Save Score</span>';
+      btn.disabled = false;
+    }, 2000);
+
+    // Refresh history to show the new entry
+    currentPage = 1;
+    loadHistory();
+
+  } catch (err) {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span class="btn-icon">💾</span><span class="btn-label">Save Score</span>';
+    btn.disabled = false;
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const body    = document.getElementById('history-body');
+  const pagination = document.getElementById('history-pagination');
+  const refreshBtn = document.getElementById('refresh-btn');
+
+  refreshBtn.classList.add('spinning');
+  body.innerHTML = '<div class="history-empty">Loading…</div>';
+
+  try {
+    const url = new URL(`${API_BASE}/score`, window.location.origin);
+    url.searchParams.set('page',  currentPage);
+    url.searchParams.set('limit', PAGE_SIZE);
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Expected shape: { scores: [...], total: N, page: N, pages: N }
+    // Adjust field names below to match whatever your API returns
+    const scores = data.scores ?? data.data ?? data.results ?? data ?? [];
+    totalPages   = data.pages ?? data.totalPages ?? Math.ceil((data.total ?? scores.length) / PAGE_SIZE) ?? 1;
+
+    renderHistory(scores);
+
+    if (totalPages > 1) {
+      pagination.style.display = '';
+      document.getElementById('prev-btn').disabled = currentPage <= 1;
+      document.getElementById('next-btn').disabled = currentPage >= totalPages;
+      document.getElementById('page-info').textContent = `Page ${currentPage} / ${totalPages}`;
+    } else {
+      pagination.style.display = 'none';
+    }
+
+  } catch (err) {
+    body.innerHTML = `<div class="history-empty" style="color:#f4a0a0">Could not load history: ${err.message}</div>`;
+    pagination.style.display = 'none';
+  } finally {
+    refreshBtn.classList.remove('spinning');
+  }
+}
+
+function renderHistory(scores) {
+  const body = document.getElementById('history-body');
+  if (!scores.length) {
+    body.innerHTML = '<div class="history-empty">No scores yet</div>';
+    return;
+  }
+  body.innerHTML = scores.map(s => {
+    const date    = s.date    ? new Date(s.date).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'2-digit'}) : '—';
+    const players = s.players || s.player_names || '—';
+    const total   = s.total   ?? s.score ?? '?';
+    return `<div class="history-item">
+      <span class="hi-date">${date}</span>
+      <span class="hi-players">${players}</span>
+      <span class="hi-score">${total}</span>
+    </div>`;
+  }).join('');
+}
+
+function changePage(delta) {
+  const next = currentPage + delta;
+  if (next < 1 || next > totalPages) return;
+  currentPage = next;
+  loadHistory();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 document.getElementById('game-date').value = new Date().toISOString().slice(0,10);
+loadHistory();
 </script>
 </body>
 </html>
