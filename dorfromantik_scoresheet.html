@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dorfromantik Scoresheet</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0f1a0c;
+    --surface:   #162012;
+    --surface2:  #1d2b18;
+    --surface3:  #243321;
+    --border:    #2e4028;
+    --border2:   #3d5535;
+    --green:     #4a7c3f;
+    --green-hi:  #6aad5a;
+    --amber:     #c88a2a;
+    --amber-hi:  #e8a83a;
+    --cream:     #e8dfc8;
+    --muted:     #7a9070;
+    --input-bg:  #0d1609;
+    --total-bg:  #1a2e15;
+    --font-body: 'DM Sans', sans-serif;
+    --font-head: 'DM Serif Display', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--cream);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    padding: 0 0 5rem 0;
+    background-image:
+      radial-gradient(ellipse 100% 40% at 50% 0%, #1e3a1660, transparent);
+  }
+
+  /* ── STICKY HEADER ── */
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #1f3318, #162a12 60%, #1a3015);
+    border-bottom: 1px solid var(--border2);
+    padding: 0.9rem 1.1rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    /* subtle dot texture */
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%234a7c3f' fill-opacity='0.07'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E"),
+      linear-gradient(135deg, #1f3318, #162a12 60%, #1a3015);
+  }
+  .hdr-left h1 {
+    font-family: var(--font-head);
+    font-size: 1.35rem;
+    color: var(--cream);
+    line-height: 1;
+  }
+  .hdr-left p {
+    font-size: 0.6rem;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+  .hdr-score {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .hdr-score .lbl {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+  }
+  .hdr-score .val {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    color: var(--amber-hi);
+    line-height: 1;
+    transition: color 0.3s, transform 0.15s;
+  }
+  .hdr-score .val.zero { color: var(--border2); }
+  .hdr-score .val.bump { transform: scale(1.12); }
+
+  /* ── PAGE BODY ── */
+  .page { padding: 0.75rem 0.75rem 0; }
+
+  /* ── SECTION CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+    animation: rise 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .card:nth-child(1) { animation-delay: 0.05s }
+  .card:nth-child(2) { animation-delay: 0.10s }
+  .card:nth-child(3) { animation-delay: 0.15s }
+  .card:nth-child(4) { animation-delay: 0.20s }
+  @keyframes rise {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .card-head {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.45rem 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-head-left {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .card-head .pill {
+    background: var(--border2);
+    color: var(--muted);
+    border-radius: 3px;
+    font-size: 0.5rem;
+    font-weight: 600;
+    padding: 1px 5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .card-head .title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card-head .subtot {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    color: var(--amber-hi);
+    transition: color 0.2s;
+    min-width: 2rem;
+    text-align: right;
+  }
+  .card-head .subtot.zero { color: var(--border2); }
+
+  /* ── TASKS GRID ── */
+  /* 5 landscape columns, each with emoji + input */
+  .tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .task-col {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .task-col:last-child { border-right: none; }
+  .task-col .emoji {
+    font-size: 1.25rem;
+    padding: 0.5rem 0 0.3rem;
+    line-height: 1;
+  }
+  .task-col input {
+    width: 100%;
+    background: var(--input-bg);
+    border: none;
+    border-top: 1px solid var(--border);
+    outline: none;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cream);
+    padding: 0.55rem 0;
+    -moz-appearance: textfield;
+    min-height: 48px;
+  }
+  .task-col input::-webkit-outer-spin-button,
+  .task-col input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .task-col input:focus {
+    background: #0f2209;
+    box-shadow: inset 0 0 0 1.5px var(--green);
+    color: #fff;
+  }
+
+  /* ── FLAGS + LONGEST in one card, two-part layout ── */
+  .flags-body {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+  }
+  .flags-left, .flags-right {
+    padding: 0.5rem 0.75rem 0.6rem;
+  }
+  .flags-divider {
+    background: var(--border);
+    width: 1px;
+  }
+  .flags-title {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .flag-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+  }
+  .flag-row:last-child { margin-bottom: 0; }
+  .flag-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .flag-lbl {
+    font-size: 0.72rem;
+    color: #9ab090;
+    flex: 1;
+  }
+  .flag-row input {
+    width: 52px;
+    background: var(--input-bg);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    outline: none;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cream);
+    padding: 0.3rem 0;
+    -moz-appearance: textfield;
+    min-height: 36px;
+    flex-shrink: 0;
+  }
+  .flag-row input::-webkit-outer-spin-button,
+  .flag-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .flag-row input:focus {
+    background: #0f2209;
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px #4a7c3f30;
+    color: #fff;
+  }
+
+  .longest-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+  }
+  .longest-row:last-child { margin-bottom: 0; }
+  .longest-icon { font-size: 0.95rem; flex-shrink: 0; }
+  .longest-lbl {
+    font-size: 0.72rem;
+    color: #9ab090;
+    flex: 1;
+  }
+  .longest-row input {
+    width: 52px;
+    background: var(--input-bg);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    outline: none;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cream);
+    padding: 0.3rem 0;
+    -moz-appearance: textfield;
+    min-height: 36px;
+    flex-shrink: 0;
+  }
+  .longest-row input::-webkit-outer-spin-button,
+  .longest-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .longest-row input:focus {
+    background: #0f2209;
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px #4a7c3f30;
+    color: #fff;
+  }
+
+  /* ── UNLOCKED ROWS ── */
+  .unlocked-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .unlocked-col {
+    display: flex;
+    flex-direction: column;
+  }
+  .unlocked-col:first-child {
+    border-right: 1px solid var(--border);
+  }
+  .unlocked-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 0.7rem;
+    height: 44px;
+    border-bottom: 1px solid var(--border);
+  }
+  .unlocked-col:first-child .unlocked-item:last-child,
+  .unlocked-col:last-child .unlocked-item:last-child {
+    border-bottom: none;
+  }
+  .unlocked-item:nth-child(odd) { background: #111d0e; }
+  .unlocked-item:nth-child(even) { background: var(--surface); }
+  .unlocked-item .u-lbl {
+    font-size: 0.68rem;
+    color: #9ab090;
+    flex: 1;
+    line-height: 1.25;
+  }
+  .unlocked-item input {
+    width: 44px;
+    height: 32px;
+    background: var(--input-bg);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    outline: none;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cream);
+    -moz-appearance: textfield;
+    flex-shrink: 0;
+  }
+  .unlocked-item input::-webkit-outer-spin-button,
+  .unlocked-item input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .unlocked-item input:focus {
+    background: #0f2209;
+    border-color: var(--green);
+    color: #fff;
+  }
+  .unlocked-item input.invalid {
+    border-color: #c0392b;
+    background: #1a0808;
+    color: #f4a0a0;
+  }
+  /* Golden heart spans full width on its own row */
+  .unlocked-item.full {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── META CARD ── */
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+    animation: rise 0.4s 0.25s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .meta-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .meta-field {
+    padding: 0.5rem 0.8rem;
+    border-right: 1px solid var(--border);
+  }
+  .meta-field:last-child { border-right: none; }
+  .meta-field label {
+    display: block;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+  .meta-field input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border2);
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--cream);
+    padding: 0.1rem 0;
+  }
+  .meta-field input:focus { border-bottom-color: var(--green); }
+  .meta-field input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.9rem;
+  }
+  .result-row .r-lbl {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .result-row .r-val {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    color: var(--amber-hi);
+    transition: color 0.2s;
+  }
+  .result-row .r-val.zero { color: var(--border2); }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--green);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #e8f5e0;
+    cursor: pointer;
+    margin-top: 0.6rem;
+    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .submit-btn.loading { background: var(--border2); }
+  .submit-btn.success { background: #2e6e25; }
+  .submit-btn .btn-icon { font-size: 1rem; line-height: 1; }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid #ffffff40;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    top: 5rem; /* overridden by JS via visualViewport */
+    left: 50%; /* overridden by JS via visualViewport */
+    transform: translateX(-50%) translateY(-8px);
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    color: var(--cream);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.error { border-color: #7a2020; background: #2a1010; color: #f4a0a0; }
+  .toast.ok    { border-color: #2e6e25; background: #0f2a0a; color: #a0e090; }
+
+  /* ── HISTORY PANEL ── */
+  .history-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.6rem;
+    animation: rise 0.4s 0.3s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .history-head {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 0.45rem 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .history-head-left {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .history-head .title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .refresh-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .refresh-btn:active { color: var(--cream); }
+  .refresh-btn.spinning { animation: spin 0.7s linear infinite; }
+
+  .history-body { padding: 0; }
+
+  .history-empty {
+    padding: 1.2rem 0.85rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    font-style: italic;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.6rem;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item:nth-child(odd) { background: #111d0e; }
+  .hi-date {
+    font-size: 0.65rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    min-width: 70px;
+  }
+  .hi-players {
+    font-size: 0.75rem;
+    color: #9ab090;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hi-score {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    color: var(--amber-hi);
+    flex-shrink: 0;
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  /* Pagination */
+  .history-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.85rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .page-btn {
+    background: var(--border2);
+    border: none;
+    border-radius: 5px;
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .page-btn:not(:disabled):active { background: var(--green); }
+  .page-info {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Dorfromantik</h1>
+    <p>Scoresheet &nbsp;·&nbsp; 1–6 players</p>
+  </div>
+  <div class="hdr-score">
+    <span class="lbl">Score</span>
+    <span class="val zero" id="hdr-val">0</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- TASKS CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">B</span>
+        <span class="title">Tasks</span>
+      </div>
+      <span class="subtot zero" id="g2">0</span>
+    </div>
+    <div class="tasks-grid">
+      <div class="task-col">
+        <span class="emoji">🌳</span>
+        <input type="number" inputmode="numeric" id="b2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🌾</span>
+        <input type="number" inputmode="numeric" id="c2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🏠</span>
+        <input type="number" inputmode="numeric" id="d2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">🚂</span>
+        <input type="number" inputmode="numeric" id="e2" min="0" placeholder="0" oninput="calc()">
+      </div>
+      <div class="task-col">
+        <span class="emoji">💧</span>
+        <input type="number" inputmode="numeric" id="f2" min="0" placeholder="0" oninput="calc()">
+      </div>
+    </div>
+  </div>
+
+  <!-- FLAGS + LONGEST CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">C·D</span>
+        <span class="title">Flags &amp; Longest</span>
+      </div>
+      <span class="subtot zero" id="g3">0</span>
+    </div>
+    <div class="flags-body">
+      <div class="flags-left">
+        <div class="flags-title">Flags (pts each)</div>
+        <div class="flag-row">
+          <span class="flag-dot" style="background:#4caf50"></span>
+          <span class="flag-lbl">Green</span>
+          <input type="number" inputmode="numeric" id="b3" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="flag-row">
+          <span class="flag-dot" style="background:#ffc107"></span>
+          <span class="flag-lbl">Yellow</span>
+          <input type="number" inputmode="numeric" id="c3" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="flag-row">
+          <span class="flag-dot" style="background:#f44336"></span>
+          <span class="flag-lbl">Red</span>
+          <input type="number" inputmode="numeric" id="d3" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+      <div class="flags-divider"></div>
+      <div class="flags-right">
+        <div class="flags-title">Longest (tile count)</div>
+        <div class="longest-row">
+          <span class="longest-icon">🚂</span>
+          <span class="longest-lbl">Track</span>
+          <input type="number" inputmode="numeric" id="e4" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="longest-row">
+          <span class="longest-icon">💧</span>
+          <span class="longest-lbl">Stream</span>
+          <input type="number" inputmode="numeric" id="f4" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNLOCKED CARD -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <span class="pill">E</span>
+        <span class="title">Unlocked</span>
+      </div>
+      <span class="subtot zero" id="g5">0</span>
+    </div>
+    <!-- Two-column grid, mirroring the spreadsheet left/right layout -->
+    <div class="unlocked-body">
+      <div class="unlocked-col">
+        <div class="unlocked-item">
+          <span class="u-lbl">Red Hearts<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">1/matching edge</em></span>
+          <input type="number" inputmode="numeric" id="b6" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Circus<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">surrounded = 10</em></span>
+          <input type="number" inputmode="numeric" id="b7" min="0" placeholder="0" oninput="validateCircus(this); calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Signalman<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/grade crossing</em></span>
+          <input type="number" inputmode="numeric" id="b8" min="0" placeholder="0" oninput="validateEven(this); calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Shepherdess<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">1/sheep</em></span>
+          <input type="number" inputmode="numeric" id="b9" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Hill<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/task tile @ dist 2</em></span>
+          <input type="number" inputmode="numeric" id="b10" min="0" placeholder="0" oninput="validateEven(this); calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Construction Site<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">territory 7+ = 7</em></span>
+          <input type="number" inputmode="numeric" id="b11" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Balloon Launch<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/distance</em></span>
+          <input type="number" inputmode="numeric" id="b12" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Golden Heart<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">2/matching edge</em></span>
+          <input type="number" inputmode="numeric" id="b13" min="0" placeholder="0" oninput="calc()">
+        </div>
+      </div>
+      <div class="unlocked-col">
+        <div class="unlocked-item">
+          <span class="u-lbl">Forest Cabin<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f6" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Harvest Festival<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f7" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Watchtower<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f8" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Locomotive<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f9" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Ship<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">-tasks</em></span>
+          <input type="number" inputmode="numeric" id="f10" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Train Station<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">closed = 1/tile</em></span>
+          <input type="number" inputmode="numeric" id="f11" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <div class="unlocked-item">
+          <span class="u-lbl">Harbor<br><em style="color:var(--muted);font-style:normal;font-size:0.6rem">closed = 1/tile</em></span>
+          <input type="number" inputmode="numeric" id="f12" min="0" placeholder="0" oninput="calc()">
+        </div>
+        <!-- empty to balance the grid -->
+        <div class="unlocked-item" style="background:var(--surface2)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- META + RESULT CARD -->
+  <div class="meta-card">
+    <div class="meta-fields">
+      <div class="meta-field">
+        <label>Player names</label>
+        <input type="text" id="player-names" placeholder="Enter names…">
+      </div>
+      <div class="meta-field">
+        <label>Date</label>
+        <input type="date" id="game-date">
+      </div>
+    </div>
+    <div class="result-row">
+      <span class="r-lbl">Result</span>
+      <span class="r-val zero" id="g14">0</span>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitScore()">
+    <span class="btn-icon">💾</span>
+    <span class="btn-label">Save Score</span>
+  </button>
+
+  <!-- HISTORY CARD -->
+  <div class="history-card">
+    <div class="history-head">
+      <div class="history-head-left">
+        <span class="pill" style="background:var(--border2)">H</span>
+        <span class="title">Score History</span>
+      </div>
+      <button class="refresh-btn" id="refresh-btn" onclick="loadHistory()" title="Refresh">↻</button>
+    </div>
+    <div class="history-body" id="history-body">
+      <div class="history-empty">Loading…</div>
+    </div>
+    <div class="history-pagination" id="history-pagination" style="display:none">
+      <button class="page-btn" id="prev-btn" onclick="changePage(-1)" disabled>← Prev</button>
+      <span class="page-info" id="page-info">Page 1</span>
+      <button class="page-btn" id="next-btn" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = '/api/v1';
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let totalPages = 1;
+
+// ── Validation ────────────────────────────────────────────────────────────────
+function validateCircus(el) {
+  const val = parseInt(el.value);
+  if (el.value === '' || val === 0 || val === 10) {
+    el.classList.remove('invalid');
+  } else {
+    el.classList.add('invalid');
+    showToast('Circus can only score 0 or 10', 'error');
+  }
+}
+
+function validateEven(el) {
+  const val = parseInt(el.value);
+  if (el.value === '' || val % 2 === 0) {
+    el.classList.remove('invalid');
+  } else {
+    el.classList.add('invalid');
+    const name = el.id === 'b8' ? 'Signalman' : 'Hill';
+    showToast(`${name} score must be even`, 'error');
+  }
+}
+
+function hasValidationErrors() {
+  return document.querySelectorAll('.invalid').length > 0;
+}
+
+
+function v(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+
+function setTot(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.classList.toggle('zero', val === 0);
+}
+
+function bump(el) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 200);
+}
+
+function calc() {
+  const g2 = v('b2')+v('c2')+v('d2')+v('e2')+v('f2');
+  setTot('g2', g2);
+
+  const g3 = v('b3')+v('c3')+v('d3')+v('e4')+v('f4');
+  setTot('g3', g3);
+
+  const g5 = v('b6')+v('f6')+v('b7')+v('f7')+v('b8')+v('f8')+
+             v('b9')+v('f9')+v('b10')+v('f10')+v('b11')+v('f11')+
+             v('b12')+v('f12')+v('b13');
+  setTot('g5', g5);
+
+  const total = g2 + g3 + g5;
+  setTot('g14', total);
+
+  const hdr = document.getElementById('hdr-val');
+  const prev = hdr.textContent;
+  hdr.textContent = total;
+  hdr.classList.toggle('zero', total === 0);
+  if (String(total) !== prev) bump(hdr);
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+// Keep toast pinned to the visual viewport (survives Android keyboard resize)
+function pinToast() {
+  const t = document.getElementById('toast');
+  const vv = window.visualViewport;
+  if (!vv) return;
+  t.style.top  = (vv.offsetTop  + 16) + 'px';
+  t.style.left = (vv.offsetLeft + vv.width / 2) + 'px';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', pinToast);
+  window.visualViewport.addEventListener('scroll', pinToast);
+}
+pinToast();
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  pinToast();
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function buildPayload() {
+  return {
+    date:    document.getElementById('game-date').value,
+    players: document.getElementById('player-names').value.trim(),
+    tasks: {
+      forest:  v('b2'),
+      grain:   v('c2'),
+      village: v('d2'),
+      track:   v('e2'),
+      stream:  v('f2'),
+      total:   v('b2')+v('c2')+v('d2')+v('e2')+v('f2'),
+    },
+    flags: {
+      green:  v('b3'),
+      yellow: v('c3'),
+      red:    v('d3'),
+    },
+    longest: {
+      track:  v('e4'),
+      stream: v('f4'),
+    },
+    unlocked: {
+      red_hearts:        v('b6'),
+      circus:            v('b7'),
+      signalman:         v('b8'),
+      shepherdess:       v('b9'),
+      hill:              v('b10'),
+      construction_site: v('b11'),
+      balloon_launch:    v('b12'),
+      golden_heart:      v('b13'),
+      forest_cabin:      v('f6'),
+      harvest_festival:  v('f7'),
+      watchtower:        v('f8'),
+      locomotive:        v('f9'),
+      ship:              v('f10'),
+      train_station:     v('f11'),
+      harbor:            v('f12'),
+    },
+    total: parseInt(document.getElementById('g14').textContent) || 0,
+  };
+}
+
+async function submitScore() {
+  const btn = document.getElementById('submit-btn');
+  const payload = buildPayload();
+
+  if (payload.total === 0) {
+    showToast('⚠️ Nothing to save — score is 0', 'error');
+    return;
+  }
+
+  if (hasValidationErrors()) {
+    showToast('⚠️ Fix validation errors before saving', 'error');
+    return;
+  }
+
+  // Loading state
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span><span class="btn-label">Saving…</span>';
+
+  try {
+    const res = await fetch(`${API_BASE}/score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    btn.classList.remove('loading');
+    btn.classList.add('success');
+    btn.innerHTML = '<span class="btn-icon">✓</span><span class="btn-label">Saved!</span>';
+    showToast('Score saved successfully', 'ok');
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.innerHTML = '<span class="btn-icon">💾</span><span class="btn-label">Save Score</span>';
+      btn.disabled = false;
+    }, 2000);
+
+    // Refresh history to show the new entry
+    currentPage = 1;
+    loadHistory();
+
+  } catch (err) {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span class="btn-icon">💾</span><span class="btn-label">Save Score</span>';
+    btn.disabled = false;
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const body    = document.getElementById('history-body');
+  const pagination = document.getElementById('history-pagination');
+  const refreshBtn = document.getElementById('refresh-btn');
+
+  refreshBtn.classList.add('spinning');
+  body.innerHTML = '<div class="history-empty">Loading…</div>';
+
+  try {
+    const url = new URL(`${API_BASE}/score`, window.location.origin);
+    url.searchParams.set('page',  currentPage);
+    url.searchParams.set('limit', PAGE_SIZE);
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Expected shape: { scores: [...], total: N, page: N, pages: N }
+    // Adjust field names below to match whatever your API returns
+    const scores = data.scores ?? data.data ?? data.results ?? data ?? [];
+    totalPages   = data.pages ?? data.totalPages ?? Math.ceil((data.total ?? scores.length) / PAGE_SIZE) ?? 1;
+
+    renderHistory(scores);
+
+    if (totalPages > 1) {
+      pagination.style.display = '';
+      document.getElementById('prev-btn').disabled = currentPage <= 1;
+      document.getElementById('next-btn').disabled = currentPage >= totalPages;
+      document.getElementById('page-info').textContent = `Page ${currentPage} / ${totalPages}`;
+    } else {
+      pagination.style.display = 'none';
+    }
+
+  } catch (err) {
+    body.innerHTML = `<div class="history-empty" style="color:#f4a0a0">Could not load history: ${err.message}</div>`;
+    pagination.style.display = 'none';
+  } finally {
+    refreshBtn.classList.remove('spinning');
+  }
+}
+
+function renderHistory(scores) {
+  const body = document.getElementById('history-body');
+  if (!scores.length) {
+    body.innerHTML = '<div class="history-empty">No scores yet</div>';
+    return;
+  }
+  body.innerHTML = scores.map(s => {
+    const date    = s.date    ? new Date(s.date).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'2-digit'}) : '—';
+    const players = s.players || s.player_names || '—';
+    const total   = s.total   ?? s.score ?? '?';
+    return `<div class="history-item">
+      <span class="hi-date">${date}</span>
+      <span class="hi-players">${players}</span>
+      <span class="hi-score">${total}</span>
+    </div>`;
+  }).join('');
+}
+
+function changePage(delta) {
+  const next = currentPage + delta;
+  if (next < 1 || next > totalPages) return;
+  currentPage = next;
+  loadHistory();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById('game-date').value = new Date().toISOString().slice(0,10);
+loadHistory();
+</script>
+</body>
+</html>
