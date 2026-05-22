@@ -297,9 +297,24 @@ function calc() {
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
+// Keep toast pinned to the visual viewport (survives Android keyboard resize)
+function pinToast() {
+  const t = document.getElementById('toast');
+  const vv = window.visualViewport;
+  if (!vv) return;
+  t.style.top  = (vv.offsetTop  + 16) + 'px';
+  t.style.left = (vv.offsetLeft + vv.width / 2) + 'px';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', pinToast);
+  window.visualViewport.addEventListener('scroll', pinToast);
+}
+pinToast();
+
 let toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
+  pinToast();
   t.textContent = msg;
   t.className = 'toast show' + (type ? ' ' + type : '');
   clearTimeout(toastTimer);
